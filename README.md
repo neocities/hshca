@@ -4,7 +4,7 @@
 
 This is a document describing **hshca**, a specification for hostname-safe HTTP content addressing using cryptographic hashes.
 
-It can be described in a sentence: A [multihash](https://github.com/jbenet/multihash), encoded in [base32hex](https://en.wikipedia.org/wiki/Base32#base32hex), downcased and stripped of its padding, which can be no longer than 63 bytes.
+It can be described in a sentence: A [multihash](https://github.com/jbenet/multihash), encoded in Base32 [RFC 4648](https://tools.ietf.org/html/rfc4648), downcased and stripped of its padding, which can be no longer than 63 bytes.
 
 This makes it comply with [RFC 1035](http://tools.ietf.org/html/rfc1035) "labels" (more commonly known as hostnames or subdomains).
 
@@ -12,24 +12,21 @@ It is intended for use with content addressing over HTTP. This makes it useful f
 
 ## Example
 
-In ruby, using the [base32](https://github.com/stesla/base32) gem:
+In ruby, using the [base32](https://github.com/stesla/base32) and [ruby-multihash](https://github.com/neocities/ruby-multihash) gems:
 
     # gem install base32 multihashes
     require 'digest'
     require 'base32'
     require 'multihashes'
 
-    Base32Hex = Base32.clone
-    Base32Hex.table = '0123456789abcdefghijklmnopqrstuv'
-
     digest = Digest::SHA256.digest 'Hello World!'
     multihash = Multihashes.encode digest, 'sha2-256'
 
-    hshca_hash = Base32Hex.encode(multihash).gsub('=', '').downcase
+    hshca_hash = Base32.encode(multihash).gsub('=', '').downcase
 
     # => "ciqh7a5rmv77d7ctxew4dakiuhlf37bnjmp2hvtxfbfn3uqacjwza2i"
 
-    Base32Hex.decode(hshca_hash.upcase) == multihash # => true
+    Base32.decode(hshca_hash.upcase) == multihash # => true
 
 This works for SHA256 digests (and SHA256 multihashes), but cannot support SHA512 due to the size limit (at least not according to the spec, but some implementations do ignore the RFC1035 63 octet/byte restriction).
 
@@ -48,6 +45,8 @@ In the future, browsers will support IPFS content addressing directly, and not r
 ## Author
 
 This specification was written by Kyle Drake for [Neocities](https://neocities.org) usage with [IPFS](http://ipfs.io), mainly for our IPFS site archiving system.
+
+Thanks to Juan Benet, Jeromy Johnson and the IPFS team for feedback and steering me in the base32 direction.
 
 ## Implementations
 
